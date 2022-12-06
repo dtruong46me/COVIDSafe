@@ -43,5 +43,5 @@ for row in range(n):
         if row < n-1 and col < n-1 and values[row+1][col+1] == -1:
             values[row][col] += 1
  
-print(values)
+# print(values)
     
