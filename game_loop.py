@@ -4,6 +4,9 @@ import os
 def creat_board():
     global virus_value
     global n
+    print()
+    print('\t\t======COVIDSafe======')
+    print()
     print('    ', end = '')
     for i in range(n):
         if (i<9):
@@ -106,19 +109,19 @@ def neighbours(row,col):
 
             if row>0:
                 neighbours(row-1,col)
-            elif col>0:
+            if col>0:
                 neighbours(row,col-1)
-            elif row<n-1:
+            if row<n-1:
                 neighbours(row+1,col)
-            elif col<n-1:
+            if col<n-1:
                 neighbours(row,col+1)
-            elif row>0 and col>0:
+            if row>0 and col>0:
                 neighbours(row-1,col-1)
-            elif row<n-1 and col<n-1:
+            if row<n-1 and col<n-1:
                 neighbours(row+1,col+1)
-            elif row>0 and col<n-1:
+            if row>0 and col<n-1:
                 neighbours(row-1,col+1)
-            elif row<n-1 and col>0:
+            if row<n-1 and col>0:
                 neighbours(row+1,col-1)
         if values[row][col] != 0:
             virus_value[row][col] = values[row][col]
