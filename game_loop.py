@@ -2,8 +2,8 @@ import numpy as np
 import os
 
 def creat_board():
+    global virus_value
     global n
-    n = 16
     print('    ', end = '')
     for i in range(n):
         if (i<9):
@@ -15,13 +15,13 @@ def creat_board():
     for i in range(n):
         print('___', end = '')
     print('_')
-    for j in range(n):
-        if (j<9):
-            print(str('0'+str(j+1)), end = ' ')
+    for row in range(n):
+        if (row<9):
+            print(str('0'+str(row+1)), end = ' ')
         else:
-            print(str(j+1), end = ' ')
-        for i in range(n):
-            print('|', end = '__')
+            print(str(row+1), end = ' ')
+        for col in range(n):
+            print('|'+ ' '+str(virus_value[row][col]),end='')
         print('|')
     print()
 
@@ -29,8 +29,7 @@ def creat_board():
 def creat_value():
     global n
     global virus
-    n = 16
-    virus = 40
+    global values
 
     lst0 = [0 for i in range(n*n-virus)]
     lst1 = [-1 for i in range(virus)]
@@ -77,11 +76,14 @@ def creat_value():
 def check_over():
     global n
     global virus
+    global virus_value
     count = 0
+
+    # If open all number: non-zero, non-virus. Example: 1,2,3,4,...8
     for row in range(n):
         for col in range(n):
-            if True:
-                pass
+            if virus_value[row][col] != ' ' and virus_value[row][col] != 'M':
+                count = count + 1
     if count == n*n-virus:
         return True
     else:
@@ -94,13 +96,13 @@ def clear():
 
 def neighbours(row,col):
     global values
-    global virus
+    global virus_value
     global visited
     if [row,col] not in visited:
         visited.append([row,col])
 
         if values[row][col] == 0:
-            virus[row][col] = values[row][col]
+            virus_value[row][col] = values[row][col]
 
             if row>0:
                 neighbours(row-1,col)
@@ -119,25 +121,36 @@ def neighbours(row,col):
             elif row<n-1 and col>0:
                 neighbours(row+1,col-1)
         if values[row][col] != 0:
-            virus[row][col] = values[row][col]
+            virus_value[row][col] = values[row][col]
 
 
 def instruction():
     print('Enter the value to open the cell:')
     print('Example: 3 4')
-    print('Enter the value and letter \'V\' to marking the cell is virus:')
-    print('Example: 4 5 V')
+    print('Enter the value and letter \'M\' to marking the cell is virus:')
+    print('Example: 4 5 M')
+    print()
 
+
+def show_virus():
+    global n
+    global values
+    global virus_value
+    for i in range(n):
+        for j in range(n):
+            if values[row][col] == -1:
+                virus_value[row][col] = 'V'
 
 if __name__ == '__main__':
     n = 16
     virus = 40
     values = [[0 for i in range(n)] for j in range(n)]
-    virus = [[' ' for i in range(n)] for j in range(n)]
-    visited = []
+    virus_value = [[' ' for i in range(n)] for j in range(n)]
     marking = []
-    over = False
     creat_value()
+    instruction()
+    over = False
+
     while not over:
         creat_board()
         user_input = input('Enter the row and column separated by space: ').split()
@@ -147,15 +160,92 @@ if __name__ == '__main__':
                 val = list(map(int,user_input))
             except ValueError:
                 clear()
+                print('Wrong input!')
+                instruction()
                 continue
         
         elif len(user_input) == 3:
-            if user_input[2] != 'V' and user_input[2] != 'v':
+            if user_input[2] != 'M' and user_input[2] != 'm':
                 clear()
+                print('Wrong input!')
+                instruction()
                 continue
             try:
                 val = list(map(int,user_input[:2]))
             except ValueError:
                 clear()
+                print('Wrong input!')
+                instruction()
+                continue
+
+            if val[0]<1 or val[1]<1 or val[0]>n or val[1]>n:
+                clear()
+                print('Wrong input!')
+                instruction()
+                continue 
+            
+            # Standardlize user_input:
+            row = val[0]-1
+            col = val[1]-1
+
+            if [row,col] in marking: # This cell already set
+                clear()
+                print('Virus is already set!')
+                continue
+
+            if virus_value[row][col] != ' ': # This cell already known
+                clear()
+                print('This cell is already know!')
                 continue
             
+            if len(marking) < virus:
+                clear()
+                marking.append([row,col])
+                virus_value[row][col] = 'M'
+                continue
+            else:
+                clear()
+                print('Marking finished!')
+                continue
+        
+        else: # Wrong input
+            clear()
+            print('Wrong input!')
+            instruction()
+            continue
+
+        if val[0]<1 or val[1]<1 or val[0]>n or val[1]>n:
+                clear()
+                print('Wrong input!')
+                instruction()
+                continue 
+        
+        row = val[0]-1
+        col = val[1]-1
+        
+        # Unflag if already flagged
+        if [row,col] in marking:
+            marking.remove([row,col])
+        
+        # Game over
+        if values[row][col] == -1: 
+            virus_value[row][col] = 'V'
+            show_virus()   
+            creat_board()
+            print('GAME OVER!!!')
+            over = True
+            continue
+        
+        elif values[row][col] == 0:
+            visited = []
+            virus_value[row][col] = '0'
+            neighbours(row,col)
+        
+        else:
+            virus_value[row][col] = values[row][col]
+        
+        if (check_over()):
+            show_virus()
+            creat_board()
+            print('YOU WIN!!!')
+            over = True
