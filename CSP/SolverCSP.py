@@ -8,7 +8,7 @@ class CSPSolution(cp_model.CpSolverSolutionCallback):
         self.__variables = variables
         self.Array = []
 
-    def solution_callback(self):
+    def on_solution_callback(self):
         lines = []
         for v in self.__variables:
             lines.append(self.Value(v))
@@ -144,7 +144,7 @@ class Solver:
 
         csp_solver = cp_model.CpSolver()
         csp_solution = CSPSolution(self.csp_variables)
-        csp_solver.parameters.enumerate_all_solution = True
+        csp_solver.parameters.enumerate_all_solutions = True
         status = csp_solver.Solve(model,csp_solution)
 
         return csp_solution.Array
